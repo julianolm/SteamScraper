@@ -11,11 +11,9 @@
   "author": "julianolm",
   "license": "ISC",
   "devDependencies": {
-    "tsx": "^3.13.0"
-  },
-  "dependencies": {
     "axios": "^1.5.1",
     "cheerio": "^1.0.0-rc.12",
-    "gpt-3-encoder": "^1.1.4"
+    "gpt-3-encoder": "^1.1.4",
+    "tsx": "^3.13.0"
   }
 }
