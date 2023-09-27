@@ -69,12 +69,8 @@ const gamePage = async (gameUrl) => {
 (async () => {
   for (const game of GAME_URLS) {
     await gamePage(game);
-    // break;
     console.log(
       "\n====================================\n====================================\n====================================\n"
     );
   }
 })();
-
-// https://store.steampowered.com/app/1091500/Cyberpunk_2077/
-// https://store.steampowered.com/app/742300/Mega_Man_11/
