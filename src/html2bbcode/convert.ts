@@ -3,7 +3,7 @@ import * as fs from "fs";
 
 const { HTML2BBCode } = html2bbcode;
 
-export const convertHtmlToBBCode = async (html: string) => {
+export const convertHtmlToBBCode = async (html: string): Promise<string> => {
   const opts = {
     // enable image scale, default: false
     imagescale: true,
