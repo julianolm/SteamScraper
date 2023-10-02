@@ -1,4 +1,4 @@
-export interface Record {
+export interface Entity {
   stringKey: string;
   english: string;
   [languageCode: string]: string;
@@ -42,11 +42,11 @@ export const languageOptions: LanguageOption[] = Object.entries(
 
 interface LocalizeRecords {
   LocalizeRecords(
-    records: Record[],
+    records: Entity[],
     target_languages: string[],
     chunkSize: number,
     requestOptions: LocalizeRecordsRequestOptions
-  ): Promise<Record[]>;
+  ): Promise<Entity[]>;
 }
 
 interface LocalizeRecordsRequestOptions {

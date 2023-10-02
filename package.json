@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "scrape": "tsx src/index.ts",
+    "s2e": "tsx src/SteamToEntities.ts",
     "convert": "tsx src/html2bbcode/convert.ts"
   },
   "author": "julianolm",
