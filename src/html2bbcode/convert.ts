@@ -1,5 +1,4 @@
 import html2bbcode from "html2bbcode";
-import * as fs from "fs";
 
 const { HTML2BBCode } = html2bbcode;
 
@@ -21,10 +20,3 @@ export const convertHtmlToBBCode = async (html: string): Promise<string> => {
   const bbcode = converter.feed(html);
   return bbcode.toString();
 }
-
-
-(async () => {
-  const html = fs.readFileSync("src/test3.html", "utf-8");
-  const bbcode = await convertHtmlToBBCode(html);
-  fs.writeFileSync("src/test3.md", bbcode);
-})();

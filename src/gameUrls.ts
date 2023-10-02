@@ -8,4 +8,5 @@ export const GAME_URLS = [
   "app/1631270/Chimera/",
   "app/1449780/Cyberwar_Neon_City/", // exemple that partner shared with us
   "app/691790/Arcadian_Atlas/?l=portuguese", // Paulo's example
+  "app/2164030/Stop_Dead/", // Example with early access section
 ];

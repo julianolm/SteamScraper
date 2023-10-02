@@ -1,9 +1,8 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import * as fs from "fs";
 import { convertHtmlToBBCode } from "@/html2bbcode/convert";
 
-import { Entity } from "@/magna";
+import { Entity } from "@/magna_api";
 
 const BASE_URL = "https://store.steampowered.com/";
 
@@ -64,9 +63,3 @@ export default async function SteamToEntities(
 
   return entities;
 }
-
-(async () => {
-  // const res = await SteamToEntities("app/691790/Arcadian_Atlas/?l=portuguese");
-  const res = await SteamToEntities("app/2164030/Stop_Dead/");
-  console.log(res);
-})();
