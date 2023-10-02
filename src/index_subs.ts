@@ -21,25 +21,3 @@ const gamesList = async () => {
   const encoded = encode("Hello world");
   console.log(encoded);
 };
-
-const gamePage = async (gameUrl) => {
-  const response = await axios.get(BASE_URL + gameUrl);
-  const html = response.data;
-  const $ = cheerio.load(html);
-  const pageTitle = $("title").text();
-  console.log(pageTitle);
-  
-  // App title
-  // #tabletGrid > div.page_content_ctn > div > div.page_title_area.game_title_area > h2
-  // const pageContent = $("div#tabletGrid > div.page_content_ctn > div.page_title_area.game_title_area > apphub_HomeHeaderContent");
-  // const pageContent = $("div#tabletGrid").text();
-  // console.log({ pageContent });
-
-  const pageTitleArea = $("div.page_title_area");
-  const gameTitle = $(pageTitleArea).find("h2").text();
-  console.log({ gameTitle });
-
-};
-
-// gamePage("app/1091500/Cyberpunk_2077/"); // cyberpunk
-gamePage("sub/821963"); // megaman

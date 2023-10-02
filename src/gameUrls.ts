@@ -5,4 +5,7 @@ export const GAME_URLS = [
   "app/2195250/EA_SPORTS_FC_24/",
   "app/1880360/Monster_Hunter_Rise_Sunbreak/?curator_clanid=33273264",
   "app/1446780/MONSTER_HUNTER_RISE/",
+  "app/1631270/Chimera/",
+  "app/1449780/Cyberwar_Neon_City/", // exemple that partner shared with us
+  "app/691790/Arcadian_Atlas/?l=portuguese", // Paulo's example
 ];

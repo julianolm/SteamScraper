@@ -1,0 +1,38 @@
+//SteamToRecords(url: string): Records[]
+  //...
+  //TranslateRecord(record: Record): record: Record
+  //VerifyBBCodeIntegrity(record: Record): boolean
+  //  if false, then send request again.
+
+//RecordsToFileTypeT(records: Records[], fileType): void 
+
+=====
+
+STEAM PAGE, EXAMPLE 1
+---
+
+SHORT DESCRIPTION -> records[0]
+
+ABOUT -> records[1]
+P1 -> records[2]
+[IAMGE]
+P2 -> records[3]
+P3 -> records[4]
+[IMAGE] -> records[5]
+LI -> records[6]
+LI -> records[7]
+ 
+=====
+
+STEAM PAGE, EXAMPLE 2
+---
+
+SHORT DESCRIPTION -> records[0]
+
+ABOUT -> records[1]
+P1 -> records[2]
+P2 -> records[3]
+[IMAGE]
+P3 -> records[4]
+[IMAGE] -> records[5]
+LI -> records[6]

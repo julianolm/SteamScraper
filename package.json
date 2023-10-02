@@ -6,14 +6,17 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "scrape": "tsx src/index.ts"
+    "scrape": "tsx src/index.ts",
+    "convert": "tsx src/html2bbcode/convert.ts"
   },
   "author": "julianolm",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^20.7.1",
     "axios": "^1.5.1",
     "cheerio": "^1.0.0-rc.12",
     "gpt-3-encoder": "^1.1.4",
+    "html2bbcode": "^1.2.6",
     "tsx": "^3.13.0"
   }
 }
