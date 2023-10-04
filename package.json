@@ -8,16 +8,22 @@
     "build": "tsc",
     "scrape": "tsx src/index.ts",
     "s2e": "tsx src/SteamToEntities.ts",
-    "convert": "tsx src/html2bbcode/convert.ts"
+    "compare": "tsx src/BBCode/BBCodeComparator.ts",
+    "render": "tsx src/BBCode/BBCodeRenderer.ts",
+    "pdf": "tsx src/PDFGenerator.ts"
   },
   "author": "julianolm",
   "license": "ISC",
   "devDependencies": {
+    "@bbob/parser": "^3.0.2",
     "@types/node": "^20.7.1",
     "axios": "^1.5.1",
+    "bbcode-parser": "^1.0.10",
     "cheerio": "^1.0.0-rc.12",
     "gpt-3-encoder": "^1.1.4",
     "html2bbcode": "^1.2.6",
+    "posthtml-render": "^3.0.0",
+    "puppeteer": "^21.3.6",
     "tsx": "^3.13.0"
   }
 }

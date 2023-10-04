@@ -31,6 +31,8 @@ export const languageRecord = {
   all: "All Languages",
 };
 
+type langop = keyof typeof languageRecord;
+
 export type LanguageOption = { value: string; label: string };
 
 export const languageOptions: LanguageOption[] = Object.entries(
@@ -40,13 +42,22 @@ export const languageOptions: LanguageOption[] = Object.entries(
   label,
 }));
 
-interface LocalizeRecords {
-  LocalizeRecords(
-    records: Entity[],
-    target_languages: string[],
-    chunkSize: number,
-    requestOptions: LocalizeRecordsRequestOptions
-  ): Promise<Entity[]>;
+// interface LocalizeRecords {
+//   LocalizeRecords(
+//     records: Entity[],
+//     target_languages: string[],
+//     chunkSize: number,
+//     requestOptions: LocalizeRecordsRequestOptions
+//   ): Promise<Entity[]>;
+// }
+
+export function LocalizeRecords(
+  records: Entity[],
+  target_languages: string[],
+  chunkSize: number,
+  requestOptions: LocalizeRecordsRequestOptions
+): Promise<Entity[]> {
+  return Promise.resolve(records);
 }
 
 interface LocalizeRecordsRequestOptions {
