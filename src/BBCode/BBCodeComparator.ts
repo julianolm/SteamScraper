@@ -2,21 +2,22 @@ import Parser from "@bbob/parser";
 
 const { parse } = Parser;
 
-function removeStringsFromContent(node) {
-  // Base case: If the node is a string, return it as is
-  if (typeof node === "string") {
-    return node;
-  }
+type TagNode = {
+  tag: string;
+  attrs?: any;
+  content?: Array<TagNode | string>;
+};
 
-  // Process the attributes if needed (you can modify attrs if necessary)
-
+function removeStringsFromContent(node: TagNode) {
   // Process the content array recursively
   const filteredContent = node.content
-    .map((item) => removeStringsFromContent(item))
+    .map((item) =>
+      typeof item === "string" ? item : removeStringsFromContent(item)
+    )
     .filter((item) => typeof item !== "string");
 
   // Create a new TagNode without strings in the content
-  const filteredNode = {
+  const filteredNode: TagNode = {
     tag: node.tag,
   };
   if (filteredContent.length > 0) {
@@ -25,13 +26,14 @@ function removeStringsFromContent(node) {
   return filteredNode;
 }
 
-function extractStructure(bbcode) {
+function extractStructure(bbcode: string) {
   const options = {
     onError: (err) =>
       console.warn(err.message, err.lineNumber, err.columnNumber),
   };
   const ast = parse(bbcode, options);
-  const result = removeStringsFromContent({ content: ast });
+  const root: TagNode = { tag: "", content: ast };
+  const result = removeStringsFromContent(root);
   return JSON.stringify(result.content);
 }
 
@@ -61,4 +63,5 @@ function main() {
   );
 }
 
-main();
+// Modify and run the main function as you need to see how it works
+// main();

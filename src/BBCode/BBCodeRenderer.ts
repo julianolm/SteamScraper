@@ -4,7 +4,7 @@ import Render from "posthtml-render";
 const { parse } = Parser;
 const { render } = Render;
 
-export default function renderBBCode(bbcode) {
+export default function renderBBCode(bbcode: string) {
   const options = {
     onError: (err) =>
       console.warn(err.message, err.lineNumber, err.columnNumber),
@@ -23,4 +23,5 @@ function main() {
   console.log(html);
 }
 
-main();
+// Modify and run the main function as you need to see how it works
+// main();
