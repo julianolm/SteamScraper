@@ -1,10 +1,6 @@
 import * as fs from "fs";
 import SteamToEntities from "@/SteamToEntities";
-import {
-  compareBBCodeStructure,
-  renderBBCode,
-  hideBBCodeImagesUrls,
-} from "@/BBCode";
+import { compareBBCodeStructure, renderBBCode, hideBBCodeImagesUrls } from "@/BBCode";
 import { languageRecord, LocalizeRecords } from "@/magnaApiMock";
 import generatePdfFromHtml from "@/PDFGenerator";
 import { Entity } from "@/magnaApiMock";
@@ -22,13 +18,8 @@ async function ExtractSteamPageEntities(gamePageUrl: string) {
   }
 }
 
-async function SteamPageTranslation(
-  entities: Entity[],
-  targetLanguage: keyof typeof languageRecord
-) {
-  const aboutSectionBBCode = entities.find(
-    (entity) => entity.stringKey === "about"
-  )?.english;
+async function SteamPageTranslation(entities: Entity[], targetLanguage: keyof typeof languageRecord) {
+  const aboutSectionBBCode = entities.find((entity) => entity.stringKey === "about")?.english;
 
   for (let i = 0; i < 5; i++) {
     const translatedEntities = await LocalizeRecords(
@@ -42,14 +33,9 @@ async function SteamPageTranslation(
         parallel_requests: 10,
       }
     );
-    const translatedAboutSectionBBCode = translatedEntities.find(
-      (entity) => entity.stringKey === "about"
-    )?.[targetLanguage];
+    const translatedAboutSectionBBCode = translatedEntities.find((entity) => entity.stringKey === "about")?.[targetLanguage];
 
-    const isSameStructure = compareBBCodeStructure(
-      aboutSectionBBCode,
-      translatedAboutSectionBBCode
-    );
+    const isSameStructure = compareBBCodeStructure(aboutSectionBBCode, translatedAboutSectionBBCode);
 
     if (isSameStructure) return translatedEntities;
   }
@@ -59,13 +45,13 @@ async function SteamPageTranslation(
 
 function generateHTML(entities, targetLanguage, metadata) {
   const shortDescriptionHTML = `
-  <h1>Short Description Section</h1>
+  <h1>${metadata.title}</h1>
   <div class="short-description">
-    <img class="short-description-image" src="${metadata.shortDescriptionImgRef}" />
-    <div class="short-description-text">
+    <img src="${metadata.shortDescriptionImgRef}" />
+    <div>
       ${entities[0][targetLanguage]}
     </div>
-  </div><br/><hr/>
+  </div>
   `;
 
   const earlyaccessDescriptionHTML =
@@ -94,30 +80,21 @@ async function generatePDF(entities, targetLanguage, metadata) {
     const pdfStyles = `
       body {
         flex: 1;
-        white-space: pre-wrap;
-        background-color: #1B2838;
+        // background-color: #1B2838;
         display: flex;
         flex-direction: column;
         align-items: center;
         height: 100%;
       }
       .content {
-        width: 616px;
         color: #acb2b8;
+        // padding: 50px 50px;
       }
       .short-description {
         font-family: Arial, Helvetica, sans-serif;
         font-weight: normal;
         font-size: 13px;
         color: #c6d4df;
-        display: flex;
-        justify-content: space-between;
-      }
-      .short-description-image {
-        width: 300px;
-      }
-      .short-description-text {
-        width: 250px;
       }
       .about {
         font-family: "Motiva Sans", Sans-serif;
@@ -140,7 +117,9 @@ async function generatePDF(entities, targetLanguage, metadata) {
         color: #fff;
       }
       img {
-        width: 600px;
+        width: 66.66vw;
+        display: block;
+        margin: 0 auto;
       }
       h1 {
         color: #fff;
@@ -209,18 +188,11 @@ async function generateJSON(translatedEntities, target_language, metadata) {
   };
   baseJson.language = target_language;
 
-  const shortDescription = translatedEntities.find(
-    (entity) => entity.stringKey === "short_description"
-  )[target_language];
+  const shortDescription = translatedEntities.find((entity) => entity.stringKey === "short_description")[target_language];
 
-  const earlyaccessDescription =
-    translatedEntities.find(
-      (entity) => entity.stringKey === "earlyaccess_description"
-    )?.[target_language] || "";
+  const earlyaccessDescription = translatedEntities.find((entity) => entity.stringKey === "earlyaccess_description")?.[target_language] || "";
 
-  const about = translatedEntities
-    .find((entity) => entity.stringKey === "about")
-    [target_language].replace(/\[h2\].*\[\/h2\]\n/, "");
+  const about = translatedEntities.find((entity) => entity.stringKey === "about")[target_language].replace(/\[h2\].*\[\/h2\]\n/, "");
   const cleanedAbout = await hideBBCodeImagesUrls(about);
 
   baseJson["app[content][short_description]"] = shortDescription;
@@ -230,31 +202,21 @@ async function generateJSON(translatedEntities, target_language, metadata) {
   const jsonPath = `out/${metadata.titleAsTag}.json`;
   fs.writeFileSync(jsonPath, JSON.stringify(baseJson));
   console.log(`JSON generated at ${jsonPath}`);
-
 }
 
-export default async function SteamPageProspectionGenerator(
-  gamePageUrl: string,
-  targetLanguage: keyof typeof languageRecord
-) {
+export default async function SteamPageProspectionGenerator(gamePageUrl: string, targetLanguage: keyof typeof languageRecord) {
   if (!Object.keys(languageRecord).find((lang) => lang === targetLanguage)) {
     throw new Error(`Invalid target language: ${targetLanguage}`);
   }
   const { entities, metadata } = await ExtractSteamPageEntities(gamePageUrl);
-  const translatedEntities = await SteamPageTranslation(
-    entities,
-    targetLanguage
-  );
-  await Promise.all([
-    generatePDF(translatedEntities, targetLanguage, metadata),
-    generateJSON(translatedEntities, targetLanguage, metadata),
-  ]);
+  const translatedEntities = await SteamPageTranslation(entities, targetLanguage);
+  await Promise.all([generatePDF(translatedEntities, targetLanguage, metadata), generateJSON(translatedEntities, targetLanguage, metadata)]);
 }
 
 async function main() {
-  const gameUrl = "https://store.steampowered.com/app/742300/Mega_Man_11/";
+  const gameUrl = "https://store.steampowered.com/app/2164030/Stop_Dead/";
   const target_language = "pt-BR";
   await SteamPageProspectionGenerator(gameUrl, target_language);
 }
 
-// main();
+main();

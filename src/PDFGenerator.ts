@@ -1,10 +1,6 @@
 import puppeteer from "puppeteer";
 
-export default async function generatePdfFromHtml(
-  htmlContent,
-  pdfPath,
-  styles
-) {
+export default async function generatePdfFromHtml(htmlContent, pdfPath, styles) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
@@ -34,10 +30,10 @@ export default async function generatePdfFromHtml(
     printBackground: true, // Ensure background colors and images are included
     timeout: 240000,
     margin: {
-      top: "0",
-      right: "0",
-      bottom: "0",
-      left: "0",
+      top: "50",
+      right: "50",
+      bottom: "50",
+      left: "50",
     },
     scale: 1,
   });
