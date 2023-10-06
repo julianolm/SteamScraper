@@ -16,7 +16,6 @@
     "axios": "^1.5.1",
     "bbcode-parser": "^1.0.10",
     "cheerio": "^1.0.0-rc.12",
-    "gpt-3-encoder": "^1.1.4",
     "html2bbcode": "^1.2.6",
     "posthtml-render": "^3.0.0",
     "puppeteer": "^21.3.6",
