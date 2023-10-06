@@ -1,15 +1,19 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { convertHtmlToBBCode } from "@/html2bbcode/convert";
+import { convertHtmlToBBCode } from "@/BBCode";
 
-import { Entity } from "@/magna_api";
+import { Entity } from "@/magnaApiMock";
 
-const BASE_URL = "https://store.steampowered.com/";
+type SteamPageMetadata = {
+  title: string;
+  titleAsTag: string;
+  shortDescriptionImgRef: string;
+};
 
 export default async function SteamToEntities(
   gamePageUrl: string
-): Promise<Entity[]> {
-  const response = await axios.get(BASE_URL + gamePageUrl);
+): Promise<{ entities: Entity[]; metadata: SteamPageMetadata }> {
+  const response = await axios.get(gamePageUrl);
   const html = response.data;
   const $ = cheerio.load(html);
 
@@ -17,9 +21,12 @@ export default async function SteamToEntities(
   // This step is important because it prevents the scraper from breaking when
   //  the game page is not accessible due to the age content blocker.
   if (!gameTitle) {
-    console.log("No game title found");
-    return [];
+    throw new Error("Invalid URL or game page not accessible");
   }
+  const titleAsTag = gameTitle
+    .replace(/\s+/g, "_")
+    .replace(/\W+/g, "")
+    .toLowerCase();
 
   const entities: Entity[] = [];
 
@@ -34,6 +41,9 @@ export default async function SteamToEntities(
       "pt-BR": "",
     });
   }
+  const shortDescriptionImgRef = $(
+    "div.game_header_image_ctn#gameHeaderImageCtn > img.game_header_image_full"
+  ).attr("src");
 
   const description = $("div#game_area_description");
   const descriptionHtml = description.html();
@@ -61,5 +71,11 @@ export default async function SteamToEntities(
     });
   }
 
-  return entities;
+  const metadata: SteamPageMetadata = {
+    title: gameTitle,
+    titleAsTag,
+    shortDescriptionImgRef,
+  };
+
+  return { entities, metadata };
 }

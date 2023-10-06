@@ -1,38 +1,47 @@
 import puppeteer from "puppeteer";
 
-export default async function generatePdfFromHtml(htmlContent, pdfPath) {
+export default async function generatePdfFromHtml(
+  htmlContent,
+  pdfPath,
+  styles
+) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
+  const fullPageHtmlContent = `
+  <html>
+    <head>
+      <title>Generated PDF</title>
+      <style>
+        ${styles}
+      </style>
+    </head>
+    <body>
+      <div class="content">
+        ${htmlContent}
+      </div
+    </body>
+  </html>
+`;
+
   // Set the content of the page with the provided HTML
-  await page.setContent(htmlContent);
+  await page.setContent(fullPageHtmlContent);
 
   // Generate PDF
-  await page.pdf({ path: pdfPath, format: "A4" });
+  await page.pdf({
+    path: pdfPath,
+    format: "A4",
+    printBackground: true, // Ensure background colors and images are included
+    timeout: 240000,
+    margin: {
+      top: "0",
+      right: "0",
+      bottom: "0",
+      left: "0",
+    },
+    scale: 1,
+  });
 
   // Close the browser
   await browser.close();
 }
-
-// // Usage example:
-// const htmlContent = `
-//   <html>
-//     <head>
-//       <title>Generated PDF</title>
-//     </head>
-//     <body>
-//       <h1>Hello, PDF!</h1>
-//       <p>This is a sample HTML content that will be converted into a PDF.</p>
-//     </body>
-//   </html>
-// `;
-
-// const pdfPath = "out/output.pdf";
-
-// generatePdfFromHtml(htmlContent, pdfPath)
-//   .then(() => {
-//     console.log(`PDF generated at ${pdfPath}`);
-//   })
-//   .catch((error) => {
-//     console.error("Error generating PDF:", error);
-//   });

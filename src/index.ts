@@ -1,20 +1,31 @@
 import * as fs from "fs";
 import SteamToEntities from "@/SteamToEntities";
-import { compareBBCodeStructure, renderBBCode } from "@/BBCode";
-import { GAME_URLS } from "@/gameUrls";
-import { languageRecord, LocalizeRecords } from "@/magna_api";
+import {
+  compareBBCodeStructure,
+  renderBBCode,
+  hideBBCodeImagesUrls,
+} from "@/BBCode";
+import { languageRecord, LocalizeRecords } from "@/magnaApiMock";
 import generatePdfFromHtml from "@/PDFGenerator";
-
-const BASE_URL = "https://store.steampowered.com/";
+import { Entity } from "@/magnaApiMock";
 
 // TO DO
-// - Paralelizar as async calls do SteamToEntities
+// - Paralellize the async calls on SteamToEntities can greatly improve performance
 
-const SteamPageTranslation = async (
-  gamePageUrl: string,
+async function ExtractSteamPageEntities(gamePageUrl: string) {
+  try {
+    const { entities, metadata } = await SteamToEntities(gamePageUrl);
+    return { entities, metadata };
+  } catch (error) {
+    console.log(`Error extracting data from: ${gamePageUrl}`);
+    throw error;
+  }
+}
+
+async function SteamPageTranslation(
+  entities: Entity[],
   targetLanguage: keyof typeof languageRecord
-) => {
-  const entities = await SteamToEntities(gamePageUrl);
+) {
   const aboutSectionBBCode = entities.find(
     (entity) => entity.stringKey === "about"
   )?.english;
@@ -33,43 +44,217 @@ const SteamPageTranslation = async (
     );
     const translatedAboutSectionBBCode = translatedEntities.find(
       (entity) => entity.stringKey === "about"
-    )?.targetLanguage;
+    )?.[targetLanguage];
 
     const isSameStructure = compareBBCodeStructure(
       aboutSectionBBCode,
       translatedAboutSectionBBCode
     );
 
-    if (isSameStructure) return entities;
+    if (isSameStructure) return translatedEntities;
   }
 
-  throw new Error(
-    `Failed to translate: '${gamePageUrl}'. BBCode structure was corrupted.`
-  );
-};
-
-function generatePDF(entities) {
-  const htmlContent = renderBBCode(entities[1]);
-  const pdfPath = "out/output.pdf";
-  generatePdfFromHtml(htmlContent, pdfPath)
-    .then(() => {
-      console.log(`PDF generated at ${pdfPath}`);
-    })
-    .catch((error) => {
-      console.error("Error generating PDF:", error);
-    });
+  throw new Error(`Failed to translate. BBCode structure was corrupted.`);
 }
 
-(async () => {
-  console.log("               Results\n====================================");
-  const results = {};
-  for (const [gameName, gamePath] of GAME_URLS) {
-    const entities = await SteamPageTranslation(gamePath, "pt-BR");
-    results[gameName] = entities;
-    generatePDF(entities);
-    console.log("====================================");
-    break;
+function generateHTML(entities, targetLanguage, metadata) {
+  const shortDescriptionHTML = `
+  <h1>Short Description Section</h1>
+  <div class="short-description">
+    <img class="short-description-image" src="${metadata.shortDescriptionImgRef}" />
+    <div class="short-description-text">
+      ${entities[0][targetLanguage]}
+    </div>
+  </div><br/><hr/>
+  `;
+
+  const earlyaccessDescriptionHTML =
+    entities.length < 3
+      ? ""
+      : `
+          <h1>Early Access Section</h1>
+          <div class="earlyaccess-description">
+            ${renderBBCode(entities[2]?.[targetLanguage])}
+          </div><br/><hr/>
+          `;
+
+  const aboutHTML = `<h1>About Section</h1>
+  <div class="about">
+    ${renderBBCode(entities[1][targetLanguage])}
+  </div>`;
+
+  const htmlContent = `${shortDescriptionHTML}${earlyaccessDescriptionHTML}${aboutHTML}`;
+  return htmlContent;
+}
+
+async function generatePDF(entities, targetLanguage, metadata) {
+  const htmlContent = generateHTML(entities, targetLanguage, metadata);
+  const pdfPath = `out/${metadata.titleAsTag}.pdf`;
+  try {
+    const pdfStyles = `
+      body {
+        flex: 1;
+        white-space: pre-wrap;
+        background-color: #1B2838;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+      }
+      .content {
+        width: 616px;
+        color: #acb2b8;
+      }
+      .short-description {
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: normal;
+        font-size: 13px;
+        color: #c6d4df;
+        display: flex;
+        justify-content: space-between;
+      }
+      .short-description-image {
+        width: 300px;
+      }
+      .short-description-text {
+        width: 250px;
+      }
+      .about {
+        font-family: "Motiva Sans", Sans-serif;
+        font-weight: normal;
+        font-size: 14px;
+        color: #acb2b8;
+      }
+      .earlyaccess-description {
+        font-family: "Motiva Sans", Sans-serif;
+        font-style: italic;
+        font-weight: normal;
+        font-size: 14px;
+        color: #8f98a0;
+      }
+      .earlyaccess-description h1 {
+        font-family: "Motiva Sans", Sans-serif;
+        font-style: italic;
+        font-weight: normal;
+        font-size: 14px;
+        color: #fff;
+      }
+      img {
+        width: 600px;
+      }
+      h1 {
+        color: #fff;
+      }
+      h2 {
+        font-family: "Motiva Sans", Sans-serif;
+        font-weight: 300;
+        font-size: 14px;
+        text-transform: uppercase;
+        color: #fff;
+        margin: 0 0 10px;
+        letter-spacing: 0.03em;
+      }
+    `;
+    const pdf = await generatePdfFromHtml(htmlContent, pdfPath, pdfStyles);
+    console.log(`PDF generated at ${pdfPath}`);
+  } catch (error) {
+    console.error("Error generating PDF:", error);
   }
-  fs.writeFileSync("results.json", JSON.stringify(results));
-  console.log("\n");
-})();
+}
+
+async function generateJSON(translatedEntities, target_language, metadata) {
+  const baseJson = {
+    language: "",
+    itemid: "",
+    "app[content][legal]": "",
+    "app[content][earlyaccess_description]": "",
+    "app[content][about]": "",
+    "app[content][short_description]": "",
+    "app[content][sysreqs][mac][min][osversion]": "",
+    "app[content][sysreqs][mac][min][processor]": "",
+    "app[content][sysreqs][mac][min][graphics]": "",
+    "app[content][sysreqs][mac][min][soundcard]": "",
+    "app[content][sysreqs][mac][min][vrsupport]": "",
+    "app[content][sysreqs][mac][min][notes]": "",
+    "app[content][sysreqs][mac][req][osversion]": "",
+    "app[content][sysreqs][mac][req][processor]": "",
+    "app[content][sysreqs][mac][req][graphics]": "",
+    "app[content][sysreqs][mac][req][soundcard]": "",
+    "app[content][sysreqs][mac][req][vrsupport]": "",
+    "app[content][sysreqs][mac][req][notes]": "",
+    "app[content][sysreqs][windows][min][osversion]": "",
+    "app[content][sysreqs][windows][min][processor]": "",
+    "app[content][sysreqs][windows][min][graphics]": "",
+    "app[content][sysreqs][windows][min][soundcard]": "",
+    "app[content][sysreqs][windows][min][vrsupport]": "",
+    "app[content][sysreqs][windows][min][notes]": "",
+    "app[content][sysreqs][windows][req][osversion]": "",
+    "app[content][sysreqs][windows][req][processor]": "",
+    "app[content][sysreqs][windows][req][graphics]": "",
+    "app[content][sysreqs][windows][req][soundcard]": "",
+    "app[content][sysreqs][windows][req][vrsupport]": "",
+    "app[content][sysreqs][windows][req][notes]": "",
+    "app[content][sysreqs][linux][min][osversion]": "",
+    "app[content][sysreqs][linux][min][processor]": "",
+    "app[content][sysreqs][linux][min][graphics]": "",
+    "app[content][sysreqs][linux][min][soundcard]": "",
+    "app[content][sysreqs][linux][min][vrsupport]": "",
+    "app[content][sysreqs][linux][min][notes]": "",
+    "app[content][sysreqs][linux][req][osversion]": "",
+    "app[content][sysreqs][linux][req][processor]": "",
+    "app[content][sysreqs][linux][req][graphics]": "",
+    "app[content][sysreqs][linux][req][soundcard]": "",
+    "app[content][sysreqs][linux][req][vrsupport]": "",
+    "app[content][sysreqs][linux][req][notes]": "",
+  };
+  baseJson.language = target_language;
+
+  const shortDescription = translatedEntities.find(
+    (entity) => entity.stringKey === "short_description"
+  )[target_language];
+
+  const earlyaccessDescription =
+    translatedEntities.find(
+      (entity) => entity.stringKey === "earlyaccess_description"
+    )?.[target_language] || "";
+
+  const about = translatedEntities
+    .find((entity) => entity.stringKey === "about")
+    [target_language].replace(/\[h2\].*\[\/h2\]\n/, "");
+  const cleanedAbout = await hideBBCodeImagesUrls(about);
+
+  baseJson["app[content][short_description]"] = shortDescription;
+  baseJson["app[content][earlyaccess_description]"] = earlyaccessDescription;
+  baseJson["app[content][about]"] = cleanedAbout;
+
+  const jsonPath = `out/${metadata.titleAsTag}.json`;
+  fs.writeFileSync(jsonPath, JSON.stringify(baseJson));
+  console.log(`JSON generated at ${jsonPath}`);
+
+}
+
+export default async function SteamPageProspectionGenerator(
+  gamePageUrl: string,
+  targetLanguage: keyof typeof languageRecord
+) {
+  if (!Object.keys(languageRecord).find((lang) => lang === targetLanguage)) {
+    throw new Error(`Invalid target language: ${targetLanguage}`);
+  }
+  const { entities, metadata } = await ExtractSteamPageEntities(gamePageUrl);
+  const translatedEntities = await SteamPageTranslation(
+    entities,
+    targetLanguage
+  );
+  await Promise.all([
+    generatePDF(translatedEntities, targetLanguage, metadata),
+    generateJSON(translatedEntities, targetLanguage, metadata),
+  ]);
+}
+
+async function main() {
+  const gameUrl = "https://store.steampowered.com/app/742300/Mega_Man_11/";
+  const target_language = "pt-BR";
+  await SteamPageProspectionGenerator(gameUrl, target_language);
+}
+
+// main();

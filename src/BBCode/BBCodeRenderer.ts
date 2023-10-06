@@ -1,8 +1,24 @@
 import Parser from "@bbob/parser";
 import Render from "posthtml-render";
+import { TagNode } from "./BBCodeComparator";
 
 const { parse } = Parser;
 const { render } = Render;
+
+function setImageSources(node: TagNode) {
+  // if the node is a img tag, set the src attribute
+  if(node.tag === "img") {
+    node.attrs.src = node.content[0];
+    node.content = [];
+    return;
+  }
+
+  // Process the content array recursively
+  const mapContent = node.content
+    .map((item) =>
+      typeof item === "string" ? item : setImageSources(item)
+    )
+}
 
 export default function renderBBCode(bbcode: string) {
   const options = {
@@ -10,18 +26,8 @@ export default function renderBBCode(bbcode: string) {
       console.warn(err.message, err.lineNumber, err.columnNumber),
   };
   const ast = parse(bbcode, options);
-  const html = render(ast);
+  const root: TagNode = { tag: "", content: ast };
+  setImageSources(root);
+  const html = render(root.content);
   return html;
 }
-
-function main() {
-  const content1 =
-    "[url]link[/url][b][h2]some nesting tag[/h2]texto negrito[/b] [img]https://i.imgur.com/1wXjY.jpg[/img]";
-
-  const html = renderBBCode(content1);
-
-  console.log(html);
-}
-
-// Modify and run the main function as you need to see how it works
-// main();

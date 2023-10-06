@@ -57,7 +57,15 @@ export function LocalizeRecords(
   chunkSize: number,
   requestOptions: LocalizeRecordsRequestOptions
 ): Promise<Entity[]> {
-  return Promise.resolve(records);
+  const translatedRecords = records.map((record) => {
+    const translatedRecord = { ...record };
+    target_languages.forEach((language) => {
+      translatedRecord[language] = record.english;
+    });
+    return translatedRecord;
+  });
+
+  return Promise.resolve(translatedRecords);
 }
 
 interface LocalizeRecordsRequestOptions {

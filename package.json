@@ -6,11 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "scrape": "tsx src/index.ts",
-    "s2e": "tsx src/SteamToEntities.ts",
-    "compare": "tsx src/BBCode/BBCodeComparator.ts",
-    "render": "tsx src/BBCode/BBCodeRenderer.ts",
-    "pdf": "tsx src/PDFGenerator.ts"
+    "scrape": "tsx src/index.ts"
   },
   "author": "julianolm",
   "license": "ISC",
