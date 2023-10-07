@@ -17,6 +17,7 @@
     "bbcode-parser": "^1.0.10",
     "cheerio": "^1.0.0-rc.12",
     "html2bbcode": "^1.2.6",
+    "pdf-lib": "^1.17.1",
     "posthtml-render": "^3.0.0",
     "puppeteer": "^21.3.6",
     "tsx": "^3.13.0"

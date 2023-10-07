@@ -30,7 +30,7 @@ function changeImageSources(node: TagNode) {
   );
 }
 
-export async function hideBBCodeImagesUrls(bbcode: string) {
+export function hideBBCodeImagesUrls(bbcode: string) {
   const options = {
     onError: (err) =>
       console.warn(err.message, err.lineNumber, err.columnNumber),
@@ -39,5 +39,5 @@ export async function hideBBCodeImagesUrls(bbcode: string) {
   const root: TagNode = { tag: "", content: ast };
   changeImageSources(root);
   const html = render(root.content);
-  return await convertHtmlToBBCode(html);
+  return convertHtmlToBBCode(html);
 }

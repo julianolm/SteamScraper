@@ -58,18 +58,22 @@ function generateHTML(entities, targetLanguage, metadata) {
     entities.length < 3
       ? ""
       : `
-          <h1>Early Access Section</h1>
+        <div class="earlyaccess-container">
+          <div class="earlyaccess-title">
+            <h1>Early Access Game</h1>
+          </div>
           <div class="earlyaccess-description">
             ${renderBBCode(entities[2]?.[targetLanguage])}
-          </div><br/><hr/>
-          `;
+          </div>
+        </div>
+      `;
 
   const aboutHTML = `<h1>About Section</h1>
   <div class="about">
     ${renderBBCode(entities[1][targetLanguage])}
   </div>`;
 
-  const htmlContent = `${shortDescriptionHTML}${earlyaccessDescriptionHTML}${aboutHTML}`;
+  const htmlContent = `<div class="content">${shortDescriptionHTML}${earlyaccessDescriptionHTML}${aboutHTML}</div>`;
   return htmlContent;
 }
 
@@ -79,16 +83,19 @@ async function generatePDF(entities, targetLanguage, metadata) {
   try {
     const pdfStyles = `
       body {
-        flex: 1;
-        // background-color: #1B2838;
+        ${metadata.pageBackgroundStyle}
+        background-position: center top;
+        background-repeat: no-repeat;
+        background-size: 100vw;
+        background-color: #1B2838;
         display: flex;
         flex-direction: column;
         align-items: center;
         height: 100%;
+        color: #acb2b8;
       }
       .content {
-        color: #acb2b8;
-        // padding: 50px 50px;
+        width: 90vw;
       }
       .short-description {
         font-family: Arial, Helvetica, sans-serif;
@@ -97,20 +104,36 @@ async function generatePDF(entities, targetLanguage, metadata) {
         color: #c6d4df;
       }
       .about {
-        font-family: "Motiva Sans", Sans-serif;
+        font-family: "montserrat", Sans-serif;
         font-weight: normal;
         font-size: 14px;
         color: #acb2b8;
       }
+      .earlyaccess-container {
+        margin-top: 20px;
+        border: 1px solid #4e81ae;
+      }
+      .earlyaccess-title {
+        background: linear-gradient(135deg,  rgba(87,164,208,1) 0%,rgba(48,93,122,1) 100%);
+        height: 50px;
+        display: flex;
+        align-items: center;
+      }
+      .earlyaccess-title h1{
+        margin: 0;
+        padding: 0 10px;
+      }
       .earlyaccess-description {
-        font-family: "Motiva Sans", Sans-serif;
+        font-family: "montserrat", Sans-serif;
         font-style: italic;
         font-weight: normal;
         font-size: 14px;
         color: #8f98a0;
+        margin-top: 20px;
+        padding: 0 10px;
       }
       .earlyaccess-description h1 {
-        font-family: "Motiva Sans", Sans-serif;
+        font-family: "montserrat", Sans-serif;
         font-style: italic;
         font-weight: normal;
         font-size: 14px;
@@ -119,13 +142,15 @@ async function generatePDF(entities, targetLanguage, metadata) {
       img {
         width: 66.66vw;
         display: block;
-        margin: 0 auto;
+        margin: 20px auto;
       }
       h1 {
+        font-family: "montserrat", Sans-serif;
+        font-size: 26px;
         color: #fff;
       }
       h2 {
-        font-family: "Motiva Sans", Sans-serif;
+        font-family: "montserrat", Sans-serif;
         font-weight: 300;
         font-size: 14px;
         text-transform: uppercase;
@@ -134,7 +159,7 @@ async function generatePDF(entities, targetLanguage, metadata) {
         letter-spacing: 0.03em;
       }
     `;
-    const pdf = await generatePdfFromHtml(htmlContent, pdfPath, pdfStyles);
+    const pdf = await generatePdfFromHtml(htmlContent, pdfPath, pdfStyles, metadata);
     console.log(`PDF generated at ${pdfPath}`);
   } catch (error) {
     console.error("Error generating PDF:", error);
@@ -219,4 +244,4 @@ async function main() {
   await SteamPageProspectionGenerator(gameUrl, target_language);
 }
 
-main();
+// main();

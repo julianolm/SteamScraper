@@ -2,7 +2,7 @@ import html2bbcode from "html2bbcode";
 
 const { HTML2BBCode } = html2bbcode;
 
-export default async function convertHtmlToBBCode(html: string): Promise<string> {
+export default function convertHtmlToBBCode(html: string): string {
   const opts = {
     // enable image scale, default: false
     imagescale: true,

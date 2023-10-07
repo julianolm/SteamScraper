@@ -8,6 +8,7 @@ type SteamPageMetadata = {
   title: string;
   titleAsTag: string;
   shortDescriptionImgRef: string;
+  pageBackgroundStyle?: string;
 };
 
 export default async function SteamToEntities(
@@ -48,7 +49,7 @@ export default async function SteamToEntities(
   const description = $("div#game_area_description");
   const descriptionHtml = description.html();
   if (descriptionHtml) {
-    const descriptionBBCode = await convertHtmlToBBCode(descriptionHtml);
+    const descriptionBBCode = convertHtmlToBBCode(descriptionHtml);
     entities.push({
       stringKey: "about",
       english: descriptionBBCode,
@@ -61,7 +62,7 @@ export default async function SteamToEntities(
     const earlyAccessDescription = earlyAccessSection
       .find("#devnotes_expander")
       .html();
-    const earlyaccessDescriptionBBCode = await convertHtmlToBBCode(
+    const earlyaccessDescriptionBBCode = convertHtmlToBBCode(
       earlyAccessDescription
     );
     entities.push({
@@ -71,10 +72,13 @@ export default async function SteamToEntities(
     });
   }
 
+  const backgroundImage = $("div.game_page_background").attr("style");
+
   const metadata: SteamPageMetadata = {
     title: gameTitle,
     titleAsTag,
     shortDescriptionImgRef,
+    pageBackgroundStyle: backgroundImage ? backgroundImage : undefined,
   };
 
   return { entities, metadata };
