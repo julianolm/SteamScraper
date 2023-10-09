@@ -78,23 +78,6 @@ async function fillDocumentMargins(pdfPath: string) {
     });
   }
 
-  // const firstPage = pages[0];
-  // firstPage.drawImage(logo, {
-  //   x: (firstPage.getWidth() - logoDims.width) / 2,
-  //   y: firstPage.getHeight() - (logoDims.height + marginHeight) / 2,
-  //   width: logoDims.width,
-  //   height: logoDims.height,
-  //   opacity: 1,
-  // });
-
-  // firstPage.drawImage(icon, {
-  //   x: (firstPage.getWidth() - iconDims.width) / 2,
-  //   y: (marginHeight - iconDims.height) / 2,
-  //   width: iconDims.width,
-  //   height: iconDims.height,
-  //   opacity: 1,
-  // });
-
   const modifiedPdfBytes = await pdfDoc.save();
   fs.writeFileSync(pdfPath, modifiedPdfBytes);
 }
