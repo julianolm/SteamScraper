@@ -4,6 +4,7 @@ import { compareBBCodeStructure, renderBBCode, hideBBCodeImagesUrls } from "@/BB
 import { languageRecord, LocalizeRecords } from "@/magnaApiMock";
 import generatePdfFromHtml from "@/PDFGenerator";
 import { Entity } from "@/magnaApiMock";
+import { getBaseSteamJson } from "@/templates"; 
 
 // TO DO
 // - Paralellize the async calls on SteamToEntities can greatly improve performance
@@ -58,8 +59,8 @@ function generateHTML(entities, targetLanguage, metadata) {
     entities.length < 3
       ? ""
       : `
-        <div class="earlyaccess-container">
-          <div class="earlyaccess-title">
+        <div class="section-container">
+          <div class="section-title">
             <h1>Early Access Game</h1>
           </div>
           <div class="earlyaccess-description">
@@ -68,10 +69,13 @@ function generateHTML(entities, targetLanguage, metadata) {
         </div>
       `;
 
-  const aboutHTML = `<h1>About Section</h1>
-  <div class="about">
-    ${renderBBCode(entities[1][targetLanguage])}
-  </div>`;
+  const aboutHTML = `
+    <div class="section-container">
+      <div class="section-title"><h1>About Section</h1></div>
+      <div class="about">
+        ${renderBBCode(entities[1][targetLanguage])}
+      </div>
+    </div>`;
 
   const htmlContent = `<div class="content">${shortDescriptionHTML}${earlyaccessDescriptionHTML}${aboutHTML}</div>`;
   return htmlContent;
@@ -103,25 +107,27 @@ async function generatePDF(entities, targetLanguage, metadata) {
         font-size: 13px;
         color: #c6d4df;
       }
-      .about {
-        font-family: "montserrat", Sans-serif;
-        font-weight: normal;
-        font-size: 14px;
-        color: #acb2b8;
-      }
-      .earlyaccess-container {
+      .section-container {
         margin-top: 20px;
         border: 1px solid #4e81ae;
       }
-      .earlyaccess-title {
+      .section-title {
         background: linear-gradient(135deg,  rgba(87,164,208,1) 0%,rgba(48,93,122,1) 100%);
         height: 50px;
         display: flex;
         align-items: center;
       }
-      .earlyaccess-title h1{
+      .section-title h1{
         margin: 0;
         padding: 0 10px;
+      }
+      .about {
+        font-family: "montserrat", Sans-serif;
+        font-weight: normal;
+        font-size: 14px;
+        color: #acb2b8;
+        padding: 0 10px;
+        margin: 20px 0;
       }
       .earlyaccess-description {
         font-family: "montserrat", Sans-serif;
@@ -167,50 +173,7 @@ async function generatePDF(entities, targetLanguage, metadata) {
 }
 
 async function generateJSON(translatedEntities, target_language, metadata) {
-  const baseJson = {
-    language: "",
-    itemid: "",
-    "app[content][legal]": "",
-    "app[content][earlyaccess_description]": "",
-    "app[content][about]": "",
-    "app[content][short_description]": "",
-    "app[content][sysreqs][mac][min][osversion]": "",
-    "app[content][sysreqs][mac][min][processor]": "",
-    "app[content][sysreqs][mac][min][graphics]": "",
-    "app[content][sysreqs][mac][min][soundcard]": "",
-    "app[content][sysreqs][mac][min][vrsupport]": "",
-    "app[content][sysreqs][mac][min][notes]": "",
-    "app[content][sysreqs][mac][req][osversion]": "",
-    "app[content][sysreqs][mac][req][processor]": "",
-    "app[content][sysreqs][mac][req][graphics]": "",
-    "app[content][sysreqs][mac][req][soundcard]": "",
-    "app[content][sysreqs][mac][req][vrsupport]": "",
-    "app[content][sysreqs][mac][req][notes]": "",
-    "app[content][sysreqs][windows][min][osversion]": "",
-    "app[content][sysreqs][windows][min][processor]": "",
-    "app[content][sysreqs][windows][min][graphics]": "",
-    "app[content][sysreqs][windows][min][soundcard]": "",
-    "app[content][sysreqs][windows][min][vrsupport]": "",
-    "app[content][sysreqs][windows][min][notes]": "",
-    "app[content][sysreqs][windows][req][osversion]": "",
-    "app[content][sysreqs][windows][req][processor]": "",
-    "app[content][sysreqs][windows][req][graphics]": "",
-    "app[content][sysreqs][windows][req][soundcard]": "",
-    "app[content][sysreqs][windows][req][vrsupport]": "",
-    "app[content][sysreqs][windows][req][notes]": "",
-    "app[content][sysreqs][linux][min][osversion]": "",
-    "app[content][sysreqs][linux][min][processor]": "",
-    "app[content][sysreqs][linux][min][graphics]": "",
-    "app[content][sysreqs][linux][min][soundcard]": "",
-    "app[content][sysreqs][linux][min][vrsupport]": "",
-    "app[content][sysreqs][linux][min][notes]": "",
-    "app[content][sysreqs][linux][req][osversion]": "",
-    "app[content][sysreqs][linux][req][processor]": "",
-    "app[content][sysreqs][linux][req][graphics]": "",
-    "app[content][sysreqs][linux][req][soundcard]": "",
-    "app[content][sysreqs][linux][req][vrsupport]": "",
-    "app[content][sysreqs][linux][req][notes]": "",
-  };
+  const baseJson = getBaseSteamJson();
   baseJson.language = target_language;
 
   const shortDescription = translatedEntities.find((entity) => entity.stringKey === "short_description")[target_language];
@@ -239,9 +202,11 @@ export default async function SteamPageProspectionGenerator(gamePageUrl: string,
 }
 
 async function main() {
-  const gameUrl = "https://store.steampowered.com/app/2164030/Stop_Dead/";
+  const gameUrl1 = "https://store.steampowered.com/app/742300/Mega_Man_11/";
+  const gameUrl2 = "https://store.steampowered.com/app/2164030/Stop_Dead/";
   const target_language = "pt-BR";
-  await SteamPageProspectionGenerator(gameUrl, target_language);
+  await SteamPageProspectionGenerator(gameUrl1, target_language);
+  await SteamPageProspectionGenerator(gameUrl2, target_language);
 }
 
 // main();
